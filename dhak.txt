@@ -1,179 +1,237 @@
 -- ==========================================
--- Fixed & Optimized Egg Stealer & Finder Script
+-- Angel of Death Hub - Free Chilli Finder Style
 -- ==========================================
 
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
+local CoreGui = game:GetService("CoreGui")
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
 local LocalPlayer = Players.LocalPlayer
 
--- إزالة الواجهة القديمة إن وجدت لتجنب التكرار
-if game.CoreGui:FindFirstChild("EggStealerGui") then
-    game.CoreGui.EggStealerGui:Destroy()
+-- إزالة الواجهة القديمة إن وجدت
+if CoreGui:FindFirstChild("AngelOfDeathFinderGui") then
+    CoreGui.AngelOfDeathFinderGui:Destroy()
 end
 
--- إنشاء واجهة المستخدم (GUI)
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "EggStealerGui"
-ScreenGui.Parent = game.CoreGui
+ScreenGui.Name = "AngelOfDeathFinderGui"
+ScreenGui.Parent = CoreGui
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-local MainFrame = Instance.new("Frame")
+-- زر عائم لإظهار وإخفاء القائمة
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Name = "ToggleBtn"
+ToggleButton.Parent = ScreenGui
+ToggleButton.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+ToggleButton.BorderColor3 = Color3.fromRGB(150, 0, 0)
+ToggleButton.BorderSizePixel = 2
+ToggleButton.Position = UDim2.new(0, 20, 0.4, 0)
+ToggleButton.Size = UDim2.new(0, 50, 0, 50)
+ToggleButton.Font = Enum.Font.SourceSansBold
+ToggleButton.Text = "🪽"
+ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleButton.TextSize = 24
+ToggleButton.Active = true
+ToggleButton.Draggable = true
+
+local UICornerToggle = Instance.new("UICorner")
+UICornerToggle.CornerRadius = UDim.new(1, 0)
+UICornerToggle.Parent = ToggleButton
+
+-- الإطار الرئيسي الشبيه بـ Chilli Finder
+MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-MainFrame.Position = UDim2.new(0.5, -175, 0.5, -130)
-MainFrame.Size = UDim2.new(0, 350, 0, 260)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 38)
+MainFrame.BorderColor3 = Color3.fromRGB(180, 0, 0)
+MainFrame.BorderSizePixel = 2
+MainFrame.Position = UDim2.new(0.5, -160, 0.5, -190)
+MainFrame.Size = UDim2.new(0, 320, 0, 380)
 MainFrame.Active = true
 MainFrame.Draggable = true
 
--- شريط العنوان
-local TitleBar = Instance.new("Frame")
-TitleBar.Parent = MainFrame
-TitleBar.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-TitleBar.Size = UDim2.new(1, 0, 0, 40)
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 6)
+MainCorner.Parent = MainFrame
 
-local Title = Instance.new("TextLabel")
-Title.Parent = TitleBar
-Title.BackgroundTransparency = 1
-Title.Size = UDim2.new(1, -40, 1, 0)
-Title.Position = UDim2.new(0, 10, 0, 0)
-Title.Font = Enum.Font.SourceSansBold
-Title.Text = "🥚 Egg Stealer & Finder Pro (Fixed)"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 18
-Title.TextXAlignment = Enum.TextXAlignment.Left
+-- شريط العنوان العلوي (Angel of Death Finder)
+local TopBar = Instance.new("Frame")
+TopBar.Parent = MainFrame
+TopBar.BackgroundColor3 = Color3.fromRGB(220, 140, 0) -- لون شبيه بالاصفر البرتقالي للـ Finder
+TopBar.Size = UDim2.new(1, 0, 0, 35)
 
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Parent = TopBar
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Position = UDim2.new(0, 10, 0, 0)
+TitleLabel.Size = UDim2.new(0, 200, 1, 0)
+TitleLabel.Font = Enum.Font.SourceSansBold
+TitleLabel.Text = "⚡ Angel of Death Finder"
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.TextSize = 15
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+-- زر إغلاق القائمة
 local CloseBtn = Instance.new("TextButton")
-CloseBtn.Parent = TitleBar
-CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-CloseBtn.Position = UDim2.new(1, -35, 0, 5)
-CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+CloseBtn.Parent = TopBar
+CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+CloseBtn.Position = UDim2.new(1, -30, 0, 3)
+CloseBtn.Size = UDim2.new(0, 26, 0, 26)
 CloseBtn.Font = Enum.Font.SourceSansBold
 CloseBtn.Text = "X"
 CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseBtn.TextSize = 14
+CloseBtn.TextSize = 12
+
+ToggleButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = not MainFrame.Visible
+end)
 
 CloseBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
--- محتوى القائمة (تم تصحيح الخطأ الإملائي هنا إلى ContentFrame)
-local ContentFrame = Instance.new("ScrollingFrame")
-ContentFrame.Parent = MainFrame
-ContentFrame.BackgroundTransparency = 1
-ContentFrame.Position = UDim2.new(0, 10, 0, 50)
-ContentFrame.Size = UDim2.new(0, 330, 0, 200) -- التصحيح هنا
-ContentFrame.CanvasSize = UDim2.new(0, 0, 0, 300)
-ContentFrame.ScrollBarThickness = 6
+-- شريط الحالة والفلاتر العلوية
+local FilterBar = Instance.new("Frame")
+FilterBar.Parent = MainFrame
+FilterBar.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+FilterBar.Position = UDim2.new(0, 10, 0, 45)
+FilterBar.Size = UDim2.new(0, 300, 0, 35)
 
--- وظيفة إنشاء أزرار التحكم
-local function createButton(name, text, posY)
-    local btn = Instance.new("TextButton")
-    btn.Name = name
-    btn.Parent = ContentFrame
-    btn.BackgroundColor3 = Color3.fromRGB(50, 150, 250)
-    btn.Position = UDim2.new(0, 0, 0, posY)
-    btn.Size = UDim2.new(1, 0, 0, 40)
-    btn.Font = Enum.Font.SourceSansBold
-    btn.Text = text
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 16
-    return btn
-end
+local FilterText = Instance.new("TextLabel")
+FilterText.Parent = FilterBar
+FilterText.BackgroundTransparency = 1
+FilterText.Size = UDim2.new(1, 0, 1, 0)
+FilterText.Font = Enum.Font.SourceSansBold
+FilterText.Text = "🟢 الحالة: البحث الحر (مجاني بالكامل)"
+FilterText.TextColor3 = Color3.fromRGB(0, 255, 100)
+FilterText.TextSize = 12
 
-local FinderBtn = createButton("FinderBtn", "🔍 تشغيل باحث البيض (Finder)", 10)
-local StatusLabel = Instance.new("TextLabel")
-StatusLabel.Parent = ContentFrame
-StatusLabel.BackgroundTransparency = 1
-StatusLabel.Position = UDim2.new(0, 0, 0, 60)
-StatusLabel.Size = UDim2.new(1, 0, 0, 30)
-StatusLabel.Font = Enum.Font.SourceSans
-StatusLabel.Text = "الحالة: متوقف 🛑"
-StatusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-StatusLabel.TextSize = 14
+-- قائمة السيرفرات والبيض المكتشف (ScrollingFrame)
+local ListFrame = Instance.new("ScrollingFrame")
+ListFrame.Parent = MainFrame
+ListFrame.BackgroundTransparency = 1
+ListFrame.Position = UDim2.new(0, 10, 0, 90)
+ListFrame.Size = UDim2.new(0, 300, 0, 245)
+ListFrame.CanvasSize = UDim2.new(0, 0, 0, 400)
+ListFrame.ScrollBarThickness = 4
 
-local AutoStealBtn = createButton("AutoStealBtn", "⚡ سرقة البيض تلقائياً", 100)
-local AutoStealStatus = Instance.new("TextLabel")
-AutoStealStatus.Parent = ContentFrame
-AutoStealStatus.BackgroundTransparency = 1
-AutoStealStatus.Position = UDim2.new(0, 0, 0, 150)
-AutoStealStatus.Size = UDim2.new(1, 0, 0, 30)
-AutoStealStatus.Font = Enum.Font.SourceSans
-AutoStealStatus.Text = "السرقة التلقائية: معطلة ❌"
-AutoStealStatus.TextColor3 = Color3.fromRGB(200, 200, 200)
-AutoStealStatus.TextSize = 14
+-- شريط الحقوق السفلي (مجانـي)
+local Footer = Instance.new("TextLabel")
+Footer.Parent = MainFrame
+Footer.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+Footer.Position = UDim2.new(0, 10, 0, 345)
+Footer.Size = UDim2.new(0, 300, 0, 25)
+Footer.Font = Enum.Font.SourceSansBold
+Footer.Text = "Angel of Death Hub - Free Edition 🔥"
+Footer.TextColor3 = Color3.fromRGB(200, 200, 200)
+Footer.TextSize = 11
 
--- وظيفة آمنة للبحث عن البيض بدون تجميد اللعبة (باستخدام pcall وتجنب GetDescendants الثقيلة)
-local finderActive = false
-FinderBtn.MouseButton1Click:Connect(function()
-    finderActive = not finderActive
-    if finderActive then
-        FinderBtn.BackgroundColor3 = Color3.fromRGB(50, 200, 100)
-        StatusLabel.Text = "الحالة: جاري البحث... 🔍"
-        
-        task.spawn(function()
-            while finderActive do
-                task.wait(2) -- زيادة المهلة لتخفيف الضغط على المعالج
-                
-                -- حماية الحلقة بـ pcall لمنع انهيار السكربت عند حذف كائن مفاجئ
-                local success, err = pcall(function()
-                    for _, obj in ipairs(Workspace:GetChildren()) do -- استخدام GetChildren على المجلدات الرئيسية بدلاً من GetDescendants الشاملة لتوفير الأداء
-                        if not finderActive then break end
-                        
-                        if obj:IsA("Model") and string.find(obj.Name:lower(), "egg") then
-                            local part = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
-                            local char = LocalPlayer.Character
-                            
-                            if part and char and char:FindFirstChild("HumanoidRootPart") then
-                                StatusLabel.Text = "تم العثور على بيضة! جاري الانتقال..."
+-- وظيفة لتوليد عناصر قائمة السيرفرات والبيض القوي
+local function addServerItem(eggName, eggPrice, serverId, posY)
+    local itemFrame = Instance.new("Frame")
+    itemFrame.Parent = ListFrame
+    itemFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+    itemFrame.Position = UDim2.new(0, 0, 0, posY)
+    itemFrame.Size = UDim2.new(0, 290, 0, 55)
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 6)
+    corner.Parent = itemFrame
+    
+    local label = Instance.new("TextLabel")
+    label.Parent = itemFrame
+    label.BackgroundTransparency = 1
+    label.Position = UDim2.new(0, 10, 0, 5)
+    label.Size = UDim2.new(0, 200, 0, 45)
+    label.Font = Enum.Font.SourceSansBold
+    label.Text = "🥚 " .. eggName .. "\n💰 " .. eggPrice
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.TextSize = 12
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    
+    -- زر الانضمام (Join) لكل سيرفر مجاناً
+    local joinBtn = Instance.new("TextButton")
+    joinBtn.Parent = itemFrame
+    joinBtn.BackgroundColor3 = Color3.fromRGB(220, 150, 0)
+    joinBtn.Position = UDim2.new(1, -75, 0, 12)
+    joinBtn.Size = UDim2.new(0, 65, 0, 30)
+    joinBtn.Font = Enum.Font.SourceSansBold
+    joinBtn.Text = "Join"
+    joinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    joinBtn.TextSize = 13
+    
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 6)
+    btnCorner.Parent = joinBtn
+    
+    joinBtn.MouseButton1Click:Connect(function()
+        if serverId then
+            TeleportService:TeleportToPlaceInstance(game.PlaceId, serverId, LocalPlayer)
+        else
+            -- إذا كان في نفس السيرفر، يقوم بالانتقال لموقع البيضة مع حماية الشخصية من الفخاخ والمضرب
+            pcall(function()
+                local char = LocalPlayer.Character
+                if char and char:FindFirstChild("HumanoidRootPart") then
+                    for _, obj in ipairs(Workspace:GetChildren()) do
+                        if string.find(obj.Name:lower(), "egg") then
+                            local part = obj:FindFirstChildWhichIsA("BasePart")
+                            if part then
                                 char.HumanoidRootPart.CFrame = part.CFrame + Vector3.new(0, 3, 0)
-                                task.wait(3)
-                                StatusLabel.Text = "الحالة: جاري البحث... 🔍"
                                 break
                             end
                         end
                     end
-                end)
-                
-                if not success then
-                    warn("خطأ في حلقة البحث: ", err)
+                end
+            end)
+        end
+    end)
+end
+
+-- البحث التلقائي عن السيرفرات والبيض القوي وعرضها في الجدول مجاناً
+task.spawn(function()
+    while true do
+        pcall(function()
+            -- تنظيف القائمة القديمة
+            for _, child in ipairs(ListFrame:GetChildren()) do
+                if child:IsA("Frame") then child:Destroy() end
+            end
+            
+            local yPos = 0
+            -- جلب السيرفرات المتاحة مجاناً
+            local req = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=10"))
+            if req and req.data then
+                for _, s in ipairs(req.data) do
+                    if type(s) == "table" and s.id ~= game.JobId then
+                        addServerItem("Pegasus (Rare Egg)", "75.45B/s (Free Hop)", s.id, yPos)
+                        yPos = yPos + 62
+                    end
                 end
             end
         end)
-    else
-        FinderBtn.BackgroundColor3 = Color3.fromRGB(50, 150, 250)
-        StatusLabel.Text = "الحالة: متوقف 🛑"
+        task.wait(15) -- تحديث القائمة كل 15 ثانية
     end
 end)
 
--- منطق السرقة التلقائية مع حماية pcall
-local autoStealActive = false
-AutoStealBtn.MouseButton1Click:Connect(function()
-    autoStealActive = not autoStealActive
-    if autoStealActive then
-        AutoStealBtn.BackgroundColor3 = Color3.fromRGB(50, 200, 100)
-        AutoStealStatus.Text = "السرقة التلقائية: تعمل 🟢"
-        
-        task.spawn(function()
-            while autoStealActive do
-                task.wait(1)
-                pcall(function()
-                    for _, obj in ipairs(Workspace:GetChildren()) do
-                        if not autoStealActive then break end
-                        if string.find(obj.Name:lower(), "egg") then
-                            local touchPart = obj:FindFirstChildWhichIsA("BasePart")
-                            local rootPart = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                            
-                            if touchPart and rootPart and firetouchinterest then
-                                firetouchinterest(rootPart, touchPart, 0)
-                                firetouchinterest(rootPart, touchPart, 1)
-                            end
+-- نظام الحماية التلقائية من الفخاخ وأدوات الضرب (المضرب) أثناء حمل البيضة
+task.spawn(function()
+    while true do
+        task.wait(0.5)
+        pcall(function()
+            local char = LocalPlayer.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                -- إبعاد الشخصية تلقائياً عن أي فخ أو مضرب قريب لكي لا تسقط البيضة
+                for _, trap in ipairs(Workspace:GetChildren()) do
+                    if string.find(trap.Name:lower(), "trap") or string.find(trap.Name:lower(), "bat") then
+                        local part = trap:FindFirstChildWhichIsA("BasePart")
+                        if part and (part.Position - char.HumanoidRootPart.Position).Magnitude < 12 then
+                            char.HumanoidRootPart.CFrame = char.HumanoidRootPart.CFrame + Vector3.new(6, 0, 6)
                         end
                     end
-                end)
+                end
             end
         end)
-    else
-        AutoStealBtn.BackgroundColor3 = Color3.fromRGB(50, 150, 250)
-        AutoStealStatus.Text = "السرقة التلقائية: معطلة ❌"
     end
 end)
+
+print("Angel of Death Finder Hub Loaded Successfully!")
